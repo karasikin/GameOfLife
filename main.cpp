@@ -1,15 +1,15 @@
 #include <iostream>
 
 #include "world.h"
-
+#include <unistd.h>
 
 int main() {
 
     World w{ {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -19,12 +19,20 @@ int main() {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              }, {10, 10} };
 
-    std::cout << std::endl << w.numberOfLivingAroundWithBorder(0) << std::endl;
-    //std::cout << std::endl << w.numberOfLivingAroundWithBorder(0) << std::endl;
 
-    //auto [x, y] = w.checkNeighbourhood(24);
+    while(true) {
+        for(auto i{ 0ul }; i < w.getWorld()->size(); ++i) {
+            std::cout << (w.getWorld()->at(i) ? '1' : ' ');
+            if((i + 1) % w.x() == 0) {
+                std::cout << std::endl;
+            }
+        }
 
-    //std::cout << x << ' ' << y << std::endl;
+        w.step();
+        sleep(1);
+        system("cls");
+    }
+
 
     return 0;
 }

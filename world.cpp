@@ -16,8 +16,20 @@ World::World(linematrix_t &&alive, point_t size)
     if(_x * _y < _alive_ptr->size()) _x = _y = 0;
 }
 
-bool World::isCellChange(index_t index, std::function<int(index_t)> numberOfLivingAround) const {
-    auto alive_around{ numberOfLivingAround(index) };
+bool World::step() {
+    for( auto i{ 0ul }; i < _alive_ptr->size(); ++i) {
+        if(isCellChange(i, &World::numberOfLivingAroundWithBorder )) {
+            _alive_ptr->at(i) = !_alive_ptr->at(i);
+        }
+    }
+
+
+    //////   Проверка на конец игры !!!!!!!!!!!!!!!!!!!!!!
+    return true;
+}
+
+bool World::isCellChange(index_t index, std::function<int(const World *, index_t)> numberOfLivingAround) const {
+    auto alive_around{ numberOfLivingAround(this, index) };
 
     auto become_alive_condition{ !_alive_ptr->at(index) && alive_around == 3 };
     auto becode_dead_condition{ _alive_ptr->at(index) && (alive_around < 2 || alive_around > 3) };
@@ -25,7 +37,6 @@ bool World::isCellChange(index_t index, std::function<int(index_t)> numberOfLivi
     return becode_dead_condition || become_alive_condition;
 }
 
-#include <iostream>
 int World::numberOfLivingAroundWithBorder(index_t index) const {
 
     auto x{ index / _y };
@@ -35,16 +46,16 @@ int World::numberOfLivingAroundWithBorder(index_t index) const {
     if(x > 0) {
         if(y > 0) number_of_living += _alive_ptr->at(index - _x - 1);
         number_of_living += _alive_ptr->at(index - _x);
-        if(y < _y) number_of_living += _alive_ptr->at(index - _x + 1);
+        if(y < _y - 1) number_of_living += _alive_ptr->at(index - _x + 1);
     }
 
     if(y > 0) number_of_living += _alive_ptr->at(index - 1);
-    if(y < _y) number_of_living += _alive_ptr->at(index + 1);
+    if(y < _y - 1) number_of_living += _alive_ptr->at(index + 1);
 
     if(x < _x - 1) {
         if(y > 0) number_of_living += _alive_ptr->at(index + _x - 1);
         number_of_living += _alive_ptr->at(index + _x);
-        if(y < _y) number_of_living += _alive_ptr->at(index + _x + 1);
+        if(y < _y - 1) number_of_living += _alive_ptr->at(index + _x + 1);
     }
 
 

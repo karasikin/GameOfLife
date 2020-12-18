@@ -23,10 +23,16 @@ public:
     index_t x() const { return _x; }
     index_t y() const { return _y; }
 
+    // Для тестов
+    // Тупо!!!!!!!!!!!!!!!!! потомм убрать!!!!!!!!!!!!!!
+    linematrix_t * getWorld() { return _alive_ptr.get(); }
+
+    bool step();
+
 private:
 
-     bool isCellChange(index_t index, std::function<int(index_t)> numberOfLivingAround) const;
-public:     int numberOfLivingAroundWithBorder(index_t index) const;
+     bool isCellChange(index_t index, std::function<int(const World *, index_t)> numberOfLivingAround) const;
+     int numberOfLivingAroundWithBorder(index_t index) const;
 
 
 private:
