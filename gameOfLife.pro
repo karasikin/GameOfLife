@@ -1,11 +1,16 @@
 TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
-CONFIG -= qt
+
+LIBS += -pthread
 
 SOURCES += \
         main.cpp \
-        world.cpp
+        world.cpp \
+        worldview.cpp
 
 HEADERS += \
-    world.h
+    world.h \
+    worldview.h
+
+QT += widgets
