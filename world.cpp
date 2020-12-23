@@ -99,13 +99,33 @@ bool World::step() {
 }
 
 void World::set(point_t point) {
-    auto &[x, y] = point;
+    auto &[x, y]{ point };
 
     if(!checkIndex(x, y)) {
         throw std::out_of_range("Index out of Range");
     }
 
     (*_current_world_ptr)[x][y] = true;
+}
+
+void World::drop(point_t point) {
+    auto &[x, y]{ point };
+
+    if(!checkIndex(x, y)) {
+        throw std::out_of_range("Index out of Range");
+    }
+
+    (*_current_world_ptr)[x][y] = false;
+}
+
+void World::inverse(point_t point) {
+    auto &[x, y]{ point };
+
+    if(!checkIndex(x, y)) {
+        throw std::out_of_range("Index out of Range");
+    }
+
+    (*_current_world_ptr)[x][y] = !(*_current_world_ptr)[x][y];
 }
 
 bool World::test(point_t point) const {

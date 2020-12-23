@@ -34,7 +34,10 @@ public:
     void setSavingLastStepChages(bool value);
 
     bool step();
+
     void set(point_t point);
+    void drop(point_t point);
+    void inverse(point_t point);
     bool test(point_t point) const;
 
 private:

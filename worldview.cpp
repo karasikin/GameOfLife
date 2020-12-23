@@ -1,6 +1,7 @@
 #include "worldview.h"
 
 #include <QPainter>
+#include <QMouseEvent>
 
 #include "world.h"
 
@@ -8,20 +9,41 @@ WorldView::WorldView(World &world, QWidget *parent)
     : QWidget(parent),
       _world(world)
 {
+    // Когда добавлю настройки тут все буду брать из них
+
     setPalette({ Qt::white });
     setAutoFillBackground(true);
+
+    pen.setColor(Qt::black);
+
+    aliveBrush.setColor(Qt::black);
+    aliveBrush.setStyle(Qt::SolidPattern);
+    deadBrush.setColor(Qt::white);
+    deadBrush.setStyle(Qt::SolidPattern);
 }
 
 void WorldView::paintEvent(QPaintEvent *event) {
 
     QPainter painter{ this };
-    QPen pen{ Qt::black };
 
     painter.setPen(pen);
 
     drawGrid(painter);
+    displayWorld(painter);
 
     QWidget::paintEvent(event);
+}
+
+#include <QDebug>
+
+void WorldView::mousePressEvent(QMouseEvent *event) {
+    auto point{ fromPixelToIndex(event->pos()) };
+
+    _world.inverse({point.x(), point.y()});
+
+    update();
+
+    QWidget::mousePressEvent(event);
 }
 
 void WorldView::drawGrid(QPainter &painter) {
@@ -36,19 +58,27 @@ void WorldView::drawGrid(QPainter &painter) {
     for(auto i{ 0ul }; i < _world.row(); ++i) {
         painter.drawLine(0, scale_y * i, width(), scale_y * i);
     }
+}
 
-    setCell(0, 0, painter);
-    setCell(2, 2, painter);
-    dropCell(2, 2, painter);
+void WorldView::displayWorld(QPainter &painter) {
+    for(auto i{ 0ul }; i < _world.row(); ++i) {
+        for(auto j{ 0ul }; j < _world.col(); ++j) {
+            if(_world.test({i, j})) {
+                setCell(i, j, painter);
+            } else {
+                dropCell(i, j, painter);
+            }
+        } // end_for
+    } // end_for
 }
 
 void WorldView::setCell(index_t row, index_t col, QPainter &painter) {
-    painter.setBrush({ Qt::black });
+    painter.setBrush(aliveBrush);
     painter.drawRect(cellRect(row, col));
 }
 
 void WorldView::dropCell(index_t row, index_t col, QPainter &painter) {
-    painter.setBrush({ Qt::white });
+    painter.setBrush(deadBrush);
     painter.drawRect(cellRect(row, col));
 }
 
@@ -63,6 +93,17 @@ double WorldView::yScale() const {
 QRectF WorldView::cellRect(index_t row, index_t col) const {
     return { col * xScale(), row * yScale(), xScale(), yScale() };
 }
+
+/// ???????????????????????&&&&&&77777777777777777777777
+QPoint WorldView::fromPixelToIndex(const QPoint &index) const {
+    return { int(index.y() / yScale()), int(index.x() / xScale()) };
+}
+
+
+
+
+
+
 
 
 
