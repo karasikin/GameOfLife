@@ -17,13 +17,22 @@ int main(int argc, char **argv) {
 
     return app.exec();
 
-//    World w{ {30, 30} };
+//    World w{ {10, 10} };
 
 //    w.set( {0, 1} );
 //    w.set( {1, 2} );
 //    w.set( {2, 0} );
 //    w.set( {2, 1} );
 //    w.set( {2, 2} );
+
+//    w.set( {9, 1} );
+//    w.set( {8, 2} );
+//    w.set( {7, 0} );
+//    w.set( {7, 1} );
+//    w.set( {7, 2} );
+
+//    w.setNeighborCountingPolicy(World::WITHOUT_BORDER);
+//    w.setSavingLastStepChages(true);
 
 //    do {
 //        system("clear");
@@ -33,6 +42,10 @@ int main(int argc, char **argv) {
 //            }
 //            std::cout << std::endl;
 //        }
+
+//        for(auto &[x, y] : w.lastStapCellsChanged()) {
+//            std::cout << "{" << x << "," << y << "} ";
+//        }std::cout << std::endl;
 
 //        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 //    } while(w.step());

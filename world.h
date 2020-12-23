@@ -13,17 +13,25 @@ public:
     using index_t = unsigned long;
     using point_t = std::tuple<index_t, index_t>;
     using matrix_t = std::vector<std::vector<bool>>;
+    using point_vector_t = std::vector<point_t>;
 
+    enum NeighborCountingPolicy{ WITH_BORDER, WITHOUT_BORDER };
 
 public:
 
-    explicit World(point_t size = {10, 10});
+    explicit World(point_t size = {10, 10},
+                   bool saveLastStepChanges = false,
+                   NeighborCountingPolicy neighborCountingPolicy = WITH_BORDER);
     World(World &&temporaryWorld);
+    World(const World &other);
 
+    index_t row() const;
+    index_t col() const;
+    const matrix_t &matrix() const;
+    const point_vector_t &lastStapCellsChanged() const;
 
-    index_t row() const { return _x; }
-    index_t col() const { return _y; }
-    const matrix_t &matrix() const { return *_current_world_ptr; }
+    void setNeighborCountingPolicy(NeighborCountingPolicy policy);
+    void setSavingLastStepChages(bool value);
 
     bool step();
     void set(point_t point);
@@ -33,6 +41,7 @@ private:
 
     bool isCellChange(point_t point) const;
     int numberOfLivingAroundWithBorder(point_t index) const;
+    int numberOfLivingAroundWithoutBorder(point_t index) const;
 
     std::unique_ptr<matrix_t> createEmptyMatrix(point_t size);
     bool checkIndex(index_t x, index_t y) const;
@@ -42,10 +51,14 @@ private:
     std::unique_ptr<matrix_t> _current_world_ptr;
     std::unique_ptr<matrix_t> _next_world_ptr;
 
-    std::function<int(const World *, point_t)> numberOfLivingAround;
+    bool _saveLastStepChages;
+    point_vector_t _lastStepCellsChanged;
 
     index_t _x;
     index_t _y;
+
+    NeighborCountingPolicy _neighborCountingPolicy;
+    std::function<int(const World *, point_t)> _numberOfLivingAround;
 
 };
 
