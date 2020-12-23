@@ -5,7 +5,6 @@
 #include <memory>
 #include <functional>
 
-
 class World {
 
 public:

@@ -34,8 +34,6 @@ void WorldView::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
 }
 
-#include <QDebug>
-
 void WorldView::mousePressEvent(QMouseEvent *event) {
     auto point{ fromPixelToIndex(event->pos()) };
 
@@ -94,16 +92,6 @@ QRectF WorldView::cellRect(index_t row, index_t col) const {
     return { col * xScale(), row * yScale(), xScale(), yScale() };
 }
 
-/// ???????????????????????&&&&&&77777777777777777777777
 QPoint WorldView::fromPixelToIndex(const QPoint &index) const {
     return { int(index.y() / yScale()), int(index.x() / xScale()) };
 }
-
-
-
-
-
-
-
-
-
