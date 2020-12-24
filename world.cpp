@@ -39,6 +39,44 @@ World::World(const World &other) {
     setNeighborCountingPolicy(other._neighborCountingPolicy);
 }
 
+World &World::operator=(World &&other) {
+    if(this == &other) {
+        return *this;
+    }
+
+    _current_world_ptr = std::move(other._current_world_ptr);
+    _next_world_ptr = std::move(other._next_world_ptr);
+
+    _saveLastStepChages = other._saveLastStepChages;
+    _lastStepCellsChanged = std::move(other._lastStepCellsChanged);
+
+    _x = other._x;
+    _y = other._y;
+
+    setNeighborCountingPolicy(other._neighborCountingPolicy);
+
+    return *this;
+}
+
+World &World::operator=(World &other) {
+    if(this == &other) {
+        return *this;
+    }
+
+    _current_world_ptr = std::make_unique<matrix_t>(*other._current_world_ptr);
+    _next_world_ptr = std::make_unique<matrix_t>(*other._next_world_ptr);
+
+    _saveLastStepChages = other._saveLastStepChages;
+    _lastStepCellsChanged = other._lastStepCellsChanged;
+
+    _x = other._x;
+    _y = other._y;
+
+    setNeighborCountingPolicy(other._neighborCountingPolicy);
+
+    return *this;
+}
+
 // Getters {
 
 World::index_t World::row() const { return _x; }
@@ -96,6 +134,14 @@ bool World::step() {
     _next_world_ptr = std::move(tmp);
 
     return was_changed;
+}
+
+void World::clear() {
+    for(auto i{ 0ul }; i < _x; ++i) {
+        for(auto j{0ul }; j < _y; ++j) {
+            (*_current_world_ptr)[i][j] = false;
+        }
+    }
 }
 
 void World::set(point_t point) {

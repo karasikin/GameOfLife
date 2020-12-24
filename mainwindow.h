@@ -6,6 +6,8 @@
 #include "world.h"
 
 class WorldView;
+class QLineEdit;
+class QPushButton;
 
 class MainWindow : public QMainWindow
 {
@@ -16,18 +18,23 @@ public:
 
     explicit MainWindow(QWidget *parent = nullptr);
 
+    bool isGameRunning() const;
+
 public slots:
 
-    void startGame();
-    void stopGame();
+    void onStartGame();
+    void onStopGame();
+    void onClearWorld();
 
 private slots:
 
-    void makeStep();
+    void onMakeStep();
+    void onWorldViewLeftMouseButtonClicked(unsigned long row, unsigned long col);
+    void onChangeWorldSize();
 
 private:
 
-    QToolBar *createToolBar() const;
+    QToolBar *createToolBar();
 
 private:
 
@@ -36,6 +43,9 @@ private:
 
     std::unique_ptr<QTimer> _timer;
 
+    QLineEdit *_world_row_line_edit;
+    QLineEdit *_world_col_line_edit;
+    QPushButton *_set_world_size_btn;
 };
 
 #endif // MAINWINDOW_H

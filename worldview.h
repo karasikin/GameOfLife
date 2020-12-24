@@ -20,6 +20,10 @@ public:
 
     explicit WorldView(World &world, QWidget *parent = nullptr);
 
+signals:
+
+    void mouseLeftButtonClickedByIndex(index_t row, index_t col);
+
 protected:
 
     void paintEvent(QPaintEvent *event) override;

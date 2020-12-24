@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>resources/start_48.png</file>
+        <file>resources/stop_48.png</file>
+        <file>resources/clear_48.png</file>
+    </qresource>
+</RCC>

@@ -24,6 +24,9 @@ public:
     World(World &&temporaryWorld);
     World(const World &other);
 
+    World &operator=(World &&other);
+    World &operator=(World &other);
+
     index_t row() const;
     index_t col() const;
     const matrix_t &matrix() const;
@@ -33,6 +36,7 @@ public:
     void setSavingLastStepChages(bool value);
 
     bool step();
+    void clear();
 
     void set(point_t point);
     void drop(point_t point);

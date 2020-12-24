@@ -16,3 +16,6 @@ HEADERS += \
     worldview.h
 
 QT += widgets
+
+RESOURCES += \
+    resources.qrc

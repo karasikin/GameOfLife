@@ -32,11 +32,10 @@ void WorldView::paintEvent(QPaintEvent *event) {
 }
 
 void WorldView::mousePressEvent(QMouseEvent *event) {
-    auto point{ fromPixelToIndex(event->pos()) };
-
-    _world.inverse({point.x(), point.y()});
-
-    update();
+    if(event->button() == Qt::LeftButton) {
+        auto point{ fromPixelToIndex(event->pos()) };
+        emit mouseLeftButtonClickedByIndex(point.x(), point.y());
+    }
 
     QWidget::mousePressEvent(event);
 }
