@@ -2,29 +2,35 @@
 #include <QApplication>
 #include <QDebug>
 
-#include "world.h"
-#include "worldview.h"
+#include "mainwindow.h"
 
 
 
 int main(int argc, char **argv) {
 
-    QApplication app{ argc, argv};
+    QApplication app{ argc, argv };
+    MainWindow mw{};
 
-    World world{ {10, 20} };
-        world.set( {0, 1} );
-        world.set( {1, 2} );
-        world.set( {2, 0} );
-        world.set( {2, 1} );
-        world.set( {2, 2} );
-
-//        qDebug() << world.test({0, 1});
-
-    WorldView world_view{ world };
-
-    world_view.show();
-
+    mw.show();
     return app.exec();
+
+
+//    QApplication app{ argc, argv};
+
+//    World world{ {10, 20} };
+//        world.set( {0, 1} );
+//        world.set( {1, 2} );
+//        world.set( {2, 0} );
+//        world.set( {2, 1} );
+//        world.set( {2, 2} );
+
+////        qDebug() << world.test({0, 1});
+
+//    WorldView world_view{ world };
+
+//    world_view.show();
+
+//    return app.exec();
 
 //    World w{ {10, 10} };
 

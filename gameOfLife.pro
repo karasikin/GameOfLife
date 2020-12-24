@@ -6,10 +6,12 @@ LIBS += -pthread
 
 SOURCES += \
         main.cpp \
+        mainwindow.cpp \
         world.cpp \
         worldview.cpp
 
 HEADERS += \
+    mainwindow.h \
     world.h \
     worldview.h
 

@@ -11,10 +11,8 @@ WorldView::WorldView(World &world, QWidget *parent)
 {
     // Когда добавлю настройки тут все буду брать из них
 
-    setPalette({ Qt::white });
-    setAutoFillBackground(true);
-
-    pen.setColor(Qt::black);
+    pen.setColor({0xbf, 0xbf, 0xbf});
+    pen.setWidth(2);
 
     aliveBrush.setColor(Qt::black);
     aliveBrush.setStyle(Qt::SolidPattern);
@@ -23,7 +21,6 @@ WorldView::WorldView(World &world, QWidget *parent)
 }
 
 void WorldView::paintEvent(QPaintEvent *event) {
-
     QPainter painter{ this };
 
     painter.setPen(pen);
