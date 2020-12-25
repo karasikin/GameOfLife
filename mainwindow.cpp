@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
+#include <QKeyEvent>
 #include <QDebug>
 
 
@@ -22,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Конец настройки
 
     _world = std::make_unique<World>(size, saveChangeList, ncPolicy);
+    _previous_world = std::make_unique<World>(size, saveChangeList, ncPolicy);
     _world_view = new WorldView(*_world);
 
     _timer = std::make_unique<QTimer>();
@@ -34,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_set_world_size_btn, &QPushButton::clicked, this, &MainWindow::onChangeWorldSize);
 
     setCentralWidget(_world_view);
+
+    _world_view->setFocus();
 }
 
 bool MainWindow::isGameRunning() const {
@@ -44,6 +48,7 @@ bool MainWindow::isGameRunning() const {
 void MainWindow::onStartGame() {
     qDebug() << "<startGame> slot colled";
     if(!isGameRunning()) {
+        _previous_world = std::make_unique<World>(*_world);
         _timer->start();
     }
 }
@@ -60,6 +65,25 @@ void MainWindow::onClearWorld() {
     if(!isGameRunning()) {
         _world->clear();
         _world_view->update();
+    }
+}
+
+void MainWindow::onRestoreWorld() {
+    qDebug() << "<restoreWorld> slot colled";
+    if(!isGameRunning()) {
+        *_world = *_previous_world;
+        _world_view->update();
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    //qDebug() << "Same key was pressed";
+    if(event->key() == Qt::Key_Space) {
+        if(isGameRunning()) {
+            onStopGame();
+        } else {
+            onStartGame();
+        }
     }
 }
 
@@ -81,6 +105,8 @@ void MainWindow::onWorldViewLeftMouseButtonClicked(unsigned long row, unsigned l
 
 void MainWindow::onChangeWorldSize() {
     bool ok{};
+
+    _world_view->setFocus();
 
     if(isGameRunning()) {
         _world_row_line_edit->setText(QString::number(_world->row()));
@@ -134,6 +160,7 @@ QToolBar *MainWindow::createToolBar() {
     tool_bar->addAction(QIcon(":images/resources/stop_48.png"), "Stop", this, &MainWindow::onStopGame);
 
     tool_bar->addAction(QIcon(":images/resources/clear_48.png"), "Clear", this, &MainWindow::onClearWorld);
+    tool_bar->addAction("Restore world", this, &MainWindow::onRestoreWorld);
 
     return tool_bar;
 }

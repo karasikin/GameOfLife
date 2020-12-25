@@ -25,6 +25,11 @@ public slots:
     void onStartGame();
     void onStopGame();
     void onClearWorld();
+    void onRestoreWorld();
+
+private:
+
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
 
@@ -39,6 +44,7 @@ private:
 private:
 
     std::unique_ptr<World> _world;
+    std::unique_ptr<World> _previous_world;
     WorldView *_world_view;
 
     std::unique_ptr<QTimer> _timer;
