@@ -1,6 +1,8 @@
 #include "world.h"
 
 #include <array>
+#include <ostream>
+#include <iostream>
 #include <stdexcept>
 
 World::World(point_t size, bool saveLastStepChanges, NeighborCountingPolicy neighborCountingPolicy)
@@ -83,6 +85,8 @@ World::index_t World::row() const { return _x; }
 World::index_t World::col() const { return _y; }
 const World::matrix_t &World::matrix() const { return *_current_world_ptr; }
 const World::point_vector_t &World::lastStapCellsChanged() const { return _lastStepCellsChanged; }
+bool World::isSaveLastStepChanges() const { return _saveLastStepChages; }
+World::NeighborCountingPolicy World::neighborCountingPolicy() const { return _neighborCountingPolicy; }
 
 // } Getters
 
@@ -258,3 +262,49 @@ std::unique_ptr<World::matrix_t> World::createEmptyMatrix(point_t size) {
 bool World::checkIndex(index_t x, index_t y) const {
     return  x < _x && y < _y;
 }
+
+std::ostream &operator<<(std::ostream &out, const World &world) {
+    out << world.row() << ' ' << world.col() << std::endl;
+    out << world.neighborCountingPolicy() << std::endl;
+    out << world.isSaveLastStepChanges() << std::endl;
+
+    for(auto i{ 0ul }; i < world.row(); ++i) {
+        for(auto j{ 0ul }; j < world.col(); ++j) {
+            if(world.test({i, j})) {
+                out << i << ' ' << j << std::endl;      // Пока что так!!!!!
+            }
+        }
+    }
+
+    return out;
+}
+
+std::istream &operator>>(std::istream &in, World &world) {
+    World::index_t row{}, col{};
+    uint policy_tmp{};
+    World::NeighborCountingPolicy policy{};
+    bool isSaveChanged{};
+
+    in >> row >> col;
+    in >> policy_tmp >> isSaveChanged;
+    policy = World::NeighborCountingPolicy(policy_tmp);
+
+    world = World{ std::tuple{row, col}, isSaveChanged, policy };
+
+    while(true) {
+        in >> row >> col;
+        if(in.eof()) break;
+        world.set({row, col});
+    }
+
+    return in;
+}
+
+
+
+
+
+
+
+
+

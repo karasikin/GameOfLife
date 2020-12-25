@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_timer.get(), &QTimer::timeout, this, &MainWindow::onMakeStep);
     connect(_world_view, &WorldView::mouseLeftButtonClickedByIndex, this, &MainWindow::onWorldViewLeftMouseButtonClicked);
     connect(_set_world_size_btn, &QPushButton::clicked, this, &MainWindow::onChangeWorldSize);
+    connect(_world_row_line_edit, &QLineEdit::returnPressed, this, &MainWindow::onChangeWorldSize);
+    connect(_world_col_line_edit, &QLineEdit::returnPressed, this, &MainWindow::onChangeWorldSize);
 
     setCentralWidget(_world_view);
 
@@ -77,14 +79,20 @@ void MainWindow::onRestoreWorld() {
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    //qDebug() << "Same key was pressed";
     if(event->key() == Qt::Key_Space) {
         if(isGameRunning()) {
             onStopGame();
         } else {
             onStartGame();
         }
+        return;
     }
+
+    if(event->matches(QKeySequence::Undo)) {
+        onRestoreWorld();
+        return;
+    }
+
 }
 
 void MainWindow::onMakeStep() {
@@ -104,37 +112,24 @@ void MainWindow::onWorldViewLeftMouseButtonClicked(unsigned long row, unsigned l
 }
 
 void MainWindow::onChangeWorldSize() {
-    bool ok{};
-
-    _world_view->setFocus();
-
-    if(isGameRunning()) {
-        _world_row_line_edit->setText(QString::number(_world->row()));
-        _world_col_line_edit->setText(QString::number(_world->col()));
-        return;
-    }
-
-    auto row_cout{ _world_row_line_edit->text().toULong(&ok) };
-    if(!ok) {
-        _world_row_line_edit->setText(QString::number(_world->row()));
-        _world_col_line_edit->setText(QString::number(_world->col()));
-        return;
-    }
-
-    auto col_cout{ _world_col_line_edit->text().toULong(&ok) };
-    if(!ok) {
-        _world_col_line_edit->setText(QString::number(_world->col()));
-        _world_row_line_edit->setText(QString::number(_world->row()));
-        return;
-    }
-
     qDebug() << "<onChangeWorldSize> slot colled";
 
-    /// Читать конфигурацию из настроек!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    bool row_ok{}, col_ok{};
+
+    _world_view->setFocus();
+    auto row_cout{ _world_row_line_edit->text().toULong(&row_ok) };
+    auto col_cout{ _world_col_line_edit->text().toULong(&col_ok) };
+
+    if(isGameRunning() || !row_ok || !col_ok) {
+        restoreRowColEdit();
+        return;
+    }
+
     if(_world->row() == row_cout && _world->col() == col_cout) {
         return;
     }
 
+    /// Читать конфигурацию из настроек!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     *_world = World{ {row_cout, col_cout}, false, World::WITHOUT_BORDER };
     _world_view->update();
 }
@@ -163,4 +158,9 @@ QToolBar *MainWindow::createToolBar() {
     tool_bar->addAction("Restore world", this, &MainWindow::onRestoreWorld);
 
     return tool_bar;
+}
+
+void MainWindow::restoreRowColEdit() {
+    _world_col_line_edit->setText(QString::number(_world->col()));
+    _world_row_line_edit->setText(QString::number(_world->row()));
 }

@@ -31,6 +31,8 @@ public:
     index_t col() const;
     const matrix_t &matrix() const;
     const point_vector_t &lastStapCellsChanged() const;
+    bool isSaveLastStepChanges() const;
+    NeighborCountingPolicy neighborCountingPolicy() const;
 
     void setNeighborCountingPolicy(NeighborCountingPolicy policy);
     void setSavingLastStepChages(bool value);
@@ -67,5 +69,8 @@ private:
     std::function<int(const World *, point_t)> _numberOfLivingAround;
 
 };
+
+std::ostream &operator<<(std::ostream &out, const World &world);
+std::istream &operator>>(std::istream &in, World &world);
 
 #endif // WORLD_H

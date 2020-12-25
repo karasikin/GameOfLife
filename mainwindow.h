@@ -40,6 +40,7 @@ private slots:
 private:
 
     QToolBar *createToolBar();
+    void restoreRowColEdit();
 
 private:
 
