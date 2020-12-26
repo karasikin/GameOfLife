@@ -2,6 +2,7 @@
 
 #include <fstream>
 
+#include <QApplication>
 #include <QToolBar>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -11,11 +12,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 
-
 #include "worldview.h"
-
-
-//const std::string FILE_EXTENSION = ".wrld";
 
 
 
@@ -82,17 +79,34 @@ void MainWindow::onStopGame() {
 
 void MainWindow::onClearWorld() {
     qDebug() << "<clearWorld> slot colled";
-    if(!isGameRunning()) {
-        _world->clear();
-        _world_view->update();
-    }
+    onStopGame();
+    _world->clear();
+    _world_view->update();
 }
 
 void MainWindow::onRestoreWorld() {
     qDebug() << "<restoreWorld> slot colled";
-    if(!isGameRunning()) {
-       *_world = *_previous_world;                // Подумать над обменом указателей для этого надо world & -> world * в WorldView
-        _world_view->update();
+    onStopGame();
+    *_world = *_previous_world;                // Подумать над обменом указателей для этого надо world & -> world * в WorldView
+    _world_view->update();
+}
+
+void MainWindow::onShowGridToggle() {
+    qDebug() << "<onShowGridToggle> slot colled";
+    _world_view->setGrid(!_world_view->grid());
+    _world_view->update();
+}
+
+void MainWindow::onBorderPolicyToggle() {
+    qDebug() << "<onBorderPolicyToggle> slot colled";
+    if(isGameRunning()) {
+        onStopGame();
+    }
+
+    if(_world->neighborCountingPolicy() == World::WITHOUT_BORDER) {
+        _world->setNeighborCountingPolicy(World::WITH_BORDER);
+    } else {
+        _world->setNeighborCountingPolicy(World::WITHOUT_BORDER);
     }
 }
 
@@ -188,6 +202,7 @@ void MainWindow::onLoadWorld() {
     if(in) {
         in >> *_world;
         _world_view->update();
+        restoreRowColEdit();
         in.close();
     }
 }
@@ -223,7 +238,8 @@ QMenuBar *MainWindow::createMenuBar() {
 
     auto file_menu{ new QMenu{"File", this} };
     file_menu->addAction("Save", this, &MainWindow::onSaveWorld, QKeySequence::Save);
-    file_menu->addAction("Load", this, &MainWindow::onLoadWorld, QKeySequence::Open);
+    file_menu->addAction("Open", this, &MainWindow::onLoadWorld, QKeySequence::Open);
+    file_menu->addAction("Quit", qApp, &QApplication::quit);
 
     auto world_menu{ new QMenu{"World", this} };
     world_menu->addAction("Step", this, &MainWindow::onMakeStep);
@@ -232,13 +248,25 @@ QMenuBar *MainWindow::createMenuBar() {
     world_menu->addAction("Clear", this, &MainWindow::onClearWorld);
     world_menu->addAction("Restore", this, &MainWindow::onRestoreWorld);
 
-    auto settings{ new QMenu{"Settings", this} };
+    auto settings_menu{ new QMenu{"Settings", this} };
 
+    auto showGridAction{ new QAction{"Show grid", this} };
+    showGridAction->setCheckable(true);
+    showGridAction->setChecked(_world_view->grid());
+    connect(showGridAction, &QAction::triggered, this, &MainWindow::onShowGridToggle);
+    settings_menu->addAction(showGridAction);
+
+
+    auto borderPolicyAction{ new QAction{"World with borders"} };
+    borderPolicyAction->setCheckable(true);
+    borderPolicyAction->setChecked(_world->neighborCountingPolicy() == World::WITH_BORDER);
+    connect(borderPolicyAction, &QAction::triggered, this, &MainWindow::onBorderPolicyToggle);
+    settings_menu->addAction(borderPolicyAction);
 
 
     menu_bar->addMenu(file_menu);
     menu_bar->addMenu(world_menu);
-    menu_bar->addMenu(settings);
+    menu_bar->addMenu(settings_menu);
 
     return menu_bar;
 }

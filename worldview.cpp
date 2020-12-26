@@ -2,30 +2,54 @@
 
 #include <QPainter>
 #include <QMouseEvent>
+#include <QDebug>
 
 #include "world.h"
 
 WorldView::WorldView(World &world, QWidget *parent)
     : QWidget(parent),
-      _world(world)
+      _world(world),
+      _grid(true)
 {
     // Когда добавлю настройки тут все буду брать из них
 
-    pen.setColor({0xbf, 0xbf, 0xbf});
-    pen.setWidth(2);
+    _pen.setColor({0xbf, 0xbf, 0xbf});
+    _pen.setWidth(2);
 
-    aliveBrush.setColor(Qt::black);
-    aliveBrush.setStyle(Qt::SolidPattern);
-    deadBrush.setColor(Qt::white);
-    deadBrush.setStyle(Qt::SolidPattern);
+    _aliveBrush.setColor(Qt::black);
+    _aliveBrush.setStyle(Qt::SolidPattern);
+    _deadBrush.setColor(Qt::white);
+    _deadBrush.setStyle(Qt::SolidPattern);
+}
+
+const QBrush &WorldView::aliveBrush() const { return _aliveBrush; }
+const QBrush &WorldView::deadBrush() const { return _deadBrush; }
+const QPen &WorldView::pen() const { return _pen; }
+bool WorldView::grid() const { return _grid; }
+
+void WorldView::setAliveBrush(const QBrush &brush) { _aliveBrush = brush; }
+void WorldView::setDeadBrush(const QBrush &brush) { _deadBrush = brush; }
+void WorldView::setPen(const QPen &pen) { _pen = pen; }
+
+void WorldView::setGrid(bool value) {
+
+    /////////////////// Настройки !!!!!!!!!!
+
+    _grid = value;
+    if(value) {
+        _pen.setWidth(2);
+        _pen.setColor({0xbf, 0xbf, 0xbf});
+    } else {
+        _pen.setWidth(0);
+        _pen.setColor({0xff, 0xff, 0xff});
+    }
 }
 
 void WorldView::paintEvent(QPaintEvent *event) {
     QPainter painter{ this };
 
-    painter.setPen(pen);
+    painter.setPen(_pen);
 
-    drawGrid(painter);
     displayWorld(painter);
 
     QWidget::paintEvent(event);
@@ -38,20 +62,6 @@ void WorldView::mousePressEvent(QMouseEvent *event) {
     }
 
     QWidget::mousePressEvent(event);
-}
-
-void WorldView::drawGrid(QPainter &painter) {
-    auto scale_x{ xScale() };
-
-    for(auto i{ 0ul }; i < _world.col(); ++i) {
-        painter.drawLine(scale_x * i, 0, scale_x * i, height());
-    }
-
-    auto scale_y{ yScale() };
-
-    for(auto i{ 0ul }; i < _world.row(); ++i) {
-        painter.drawLine(0, scale_y * i, width(), scale_y * i);
-    }
 }
 
 void WorldView::displayWorld(QPainter &painter) {
@@ -67,12 +77,12 @@ void WorldView::displayWorld(QPainter &painter) {
 }
 
 void WorldView::setCell(index_t row, index_t col, QPainter &painter) {
-    painter.setBrush(aliveBrush);
+    painter.setBrush(_aliveBrush);
     painter.drawRect(cellRect(row, col));
 }
 
 void WorldView::dropCell(index_t row, index_t col, QPainter &painter) {
-    painter.setBrush(deadBrush);
+    painter.setBrush(_deadBrush);
     painter.drawRect(cellRect(row, col));
 }
 

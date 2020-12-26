@@ -27,6 +27,9 @@ public slots:
     void onClearWorld();
     void onRestoreWorld();
 
+    void onShowGridToggle();
+    void onBorderPolicyToggle();
+
 private:
 
     void keyPressEvent(QKeyEvent *event);
