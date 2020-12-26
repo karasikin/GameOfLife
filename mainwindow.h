@@ -37,9 +37,13 @@ private slots:
     void onWorldViewLeftMouseButtonClicked(unsigned long row, unsigned long col);
     void onChangeWorldSize();
 
+    void onSaveWorld();
+    void onLoadWorld();
+
 private:
 
     QToolBar *createToolBar();
+    QMenuBar *createMenuBar();
     void restoreRowColEdit();
 
 private:
