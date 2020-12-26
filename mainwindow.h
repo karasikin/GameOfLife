@@ -24,6 +24,7 @@ public slots:
 
     void onStartGame();
     void onStopGame();
+    void onStepGame();
     void onClearWorld();
     void onRestoreWorld();
 

@@ -78,6 +78,14 @@ void MainWindow::onStopGame() {
     }
 }
 
+void MainWindow::onStepGame() {
+    qDebug() << "<onStepGame> slot colled";
+
+    if(!isGameRunning()) {
+        onMakeStep();
+    }
+}
+
 void MainWindow::onClearWorld() {
     qDebug() << "<clearWorld> slot colled";
     onStopGame();
@@ -125,7 +133,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         onRestoreWorld();
         return;
     }
-
 }
 
 void MainWindow::onMakeStep() {
@@ -238,7 +245,6 @@ QToolBar *MainWindow::createSettingsToolBar() {
     //////////////////////////////////////////////////////////////////////
 
     _settings_tool_bar_view_action = tool_bar->toggleViewAction();
-    _settings_tool_bar_view_action->setIcon(QIcon(":images/resources/start_48.png"));
 
     return tool_bar;
 }
@@ -250,12 +256,15 @@ QToolBar *MainWindow::createControlToolBar() {
     tool_bar->setMovable(false);
     tool_bar->setMinimumHeight(40);
 
+    _settings_tool_bar_view_action->setIcon(QIcon(":images/resources/view_64.png"));
+    _settings_tool_bar_view_action->setShortcut(QKeySequence::NextChild);
     tool_bar->addAction(_settings_tool_bar_view_action);
-    tool_bar->addAction(QIcon(":images/resources/start_48.png"), "Start", this, &MainWindow::onStartGame);
-    tool_bar->addAction(QIcon(":images/resources/stop_48.png"), "Stop", this, &MainWindow::onStopGame);
-
-    tool_bar->addAction(QIcon(":images/resources/clear_48.png"), "Clear", this, &MainWindow::onClearWorld);
-    tool_bar->addAction("Restore", this, &MainWindow::onRestoreWorld);
+    tool_bar->addAction(QIcon(":images/resources/step_64.png"), "Step", this, &MainWindow::onStepGame);
+    tool_bar->addAction(QIcon(":images/resources/start_64.png"), "Start", this, &MainWindow::onStartGame);
+    tool_bar->addAction(QIcon(":images/resources/stop_64.png"), "Stop", this, &MainWindow::onStopGame);
+    tool_bar->addAction(QIcon(":images/resources/clear_64.png"), "Clear", this, &MainWindow::onClearWorld);
+    auto restore_action = tool_bar->addAction(QIcon(":images/resources/undo_64.png"), "Restore", this, &MainWindow::onRestoreWorld);
+    restore_action->setShortcut(QKeySequence::Refresh);
 
     return tool_bar;
 }
@@ -269,7 +278,7 @@ QMenuBar *MainWindow::createMenuBar() {
     file_menu->addAction("Quit", qApp, &QApplication::quit);
 
     auto world_menu{ new QMenu{"World", this} };
-    world_menu->addAction("Step", this, &MainWindow::onMakeStep);
+    world_menu->addAction("Step", this, &MainWindow::onStepGame);
     world_menu->addAction("Start", this, &MainWindow::onStartGame);
     world_menu->addAction("Stop", this, &MainWindow::onStopGame);
     world_menu->addAction("Clear", this, &MainWindow::onClearWorld);
