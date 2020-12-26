@@ -45,7 +45,8 @@ private slots:
 
 private:
 
-    QToolBar *createToolBar();
+    QToolBar *createSettingsToolBar();
+    QToolBar *createControlToolBar();
     QMenuBar *createMenuBar();
     void restoreRowColEdit();
 
@@ -53,13 +54,19 @@ private:
 
     std::unique_ptr<World> _world;
     std::unique_ptr<World> _previous_world;
-    WorldView *_world_view;
 
     std::unique_ptr<QTimer> _timer;
+
+    WorldView *_world_view;
 
     QLineEdit *_world_row_line_edit;
     QLineEdit *_world_col_line_edit;
     QPushButton *_set_world_size_btn;
+
+    QLineEdit *_timer_line_edit;
+    QPushButton *_set_timer_interval_btn;
+
+    QAction *_settings_tool_bar_view_action;
 };
 
 #endif // MAINWINDOW_H

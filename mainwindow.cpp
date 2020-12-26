@@ -43,7 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
     _timer = std::make_unique<QTimer>();
     _timer->setInterval(timerInterval);
 
-    addToolBar(Qt::TopToolBarArea, createToolBar());
+    addToolBar(Qt::LeftToolBarArea, createSettingsToolBar());
+    addToolBar(Qt::TopToolBarArea, createControlToolBar());
     setMenuBar(createMenuBar());
 
     connect(_timer.get(), &QTimer::timeout, this, &MainWindow::onMakeStep);
@@ -207,23 +208,49 @@ void MainWindow::onLoadWorld() {
     }
 }
 
-QToolBar *MainWindow::createToolBar() {
-    auto tool_bar{ new QToolBar{"Tool Bar"} };
+
+QToolBar *MainWindow::createSettingsToolBar() {
+    auto tool_bar{ new QToolBar{"Settings Toolbar"} };
+
+    tool_bar->addWidget(new QLabel{ "Size: ", this });
+
+    _world_row_line_edit = new QLineEdit{ QString::number(_world->row()), this };
+    _world_row_line_edit->setMaximumWidth(50);
+    tool_bar->addWidget(_world_row_line_edit);
+
+    _world_col_line_edit = new QLineEdit{ QString::number(_world->col()), this };
+    _world_col_line_edit->setMaximumWidth(50);
+    tool_bar->addWidget(_world_col_line_edit);
+
+    _set_world_size_btn = new QPushButton{ "Resize", this };
+    tool_bar->addWidget(_set_world_size_btn);
+
+    ///// Заглушка дописать ////////////////////
+/////////////////////////////////////////////////////////////
+    tool_bar->addWidget(new QLabel{"Timer: ", this});
+
+    _timer_line_edit = new QLineEdit{"100", this};   // Временные меры
+    _timer_line_edit->setMaximumWidth(50);
+    tool_bar->addWidget(_timer_line_edit);
+
+    _set_timer_interval_btn = new QPushButton{"Interval", this};
+    tool_bar->addWidget(_set_timer_interval_btn);
+    //////////////////////////////////////////////////////////////////////
+
+    _settings_tool_bar_view_action = tool_bar->toggleViewAction();
+    _settings_tool_bar_view_action->setIcon(QIcon(":images/resources/start_48.png"));
+
+    return tool_bar;
+}
+
+
+QToolBar *MainWindow::createControlToolBar() {
+    auto tool_bar{ new QToolBar{"Control Toolbar"} };
     tool_bar->setFloatable(false);
     tool_bar->setMovable(false);
     tool_bar->setMinimumHeight(40);
 
-    _world_row_line_edit = new QLineEdit{ QString::number(_world->row()), this };
-    _world_row_line_edit->setMaximumWidth(70);
-    tool_bar->addWidget(_world_row_line_edit);
-
-    _world_col_line_edit = new QLineEdit{ QString::number(_world->col()), this };
-    _world_col_line_edit->setMaximumWidth(70);
-    tool_bar->addWidget(_world_col_line_edit);
-
-    _set_world_size_btn = new QPushButton{ "Set new size", this };
-    tool_bar->addWidget(_set_world_size_btn);
-
+    tool_bar->addAction(_settings_tool_bar_view_action);
     tool_bar->addAction(QIcon(":images/resources/start_48.png"), "Start", this, &MainWindow::onStartGame);
     tool_bar->addAction(QIcon(":images/resources/stop_48.png"), "Stop", this, &MainWindow::onStopGame);
 

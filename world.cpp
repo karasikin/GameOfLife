@@ -299,12 +299,3 @@ std::istream &operator>>(std::istream &in, World &world) {
 
     return in;
 }
-
-
-
-
-
-
-
-
-
