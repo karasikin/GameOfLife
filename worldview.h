@@ -18,7 +18,7 @@ public:
 
 public:
 
-    explicit WorldView(World &world, QWidget *parent = nullptr);
+    explicit WorldView(World *world, QWidget *parent = nullptr);
 
     const QBrush &aliveBrush() const;
     const QBrush &deadBrush() const;
@@ -29,6 +29,8 @@ public:
     void setDeadBrush(const QBrush &brush);
     void setPen(const QPen &pen);
     void setGrid(bool value);
+
+    void setWorld(World *world);
 
 signals:
 
@@ -52,7 +54,7 @@ private:
 
 private:
 
-    World &_world;
+    World *_world;
 
     QBrush _aliveBrush;
     QBrush _deadBrush;

@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
       _previous_world(initDefaultWorld()),
       _timer(std::make_unique<QTimer>()),
       _timer_interval(DefaultSettings::timerIntervaMs),
-      _world_view(new WorldView{*_world})
+      _world_view(new WorldView{_world.get()})
 
 {
     auto font{ this->font() };
@@ -90,7 +90,12 @@ void MainWindow::onClearWorld() {
 void MainWindow::onRestoreWorld() {
     qDebug() << "<restoreWorld> slot colled";
     onStopGame();
-    *_world = *_previous_world;                // Подумать над обменом указателей для этого надо world & -> world * в WorldView
+
+    auto tmp{ std::move(_world) };
+    _world = std::move(_previous_world);
+    _previous_world = std::move(tmp);
+    _world_view->setWorld(_world.get());
+
     _world_view->update();
 }
 
@@ -266,12 +271,9 @@ QToolBar *MainWindow::createSettingsToolBar() {
     tool_bar->addWidget(_set_world_size_btn);
     tool_bar->addSeparator();
 
-    ///// Заглушка дописать ////////////////////
-/////////////////////////////////////////////////////////////
     tool_bar->addWidget(new QLabel{"Timer: ", this});
     tool_bar->addWidget(_timer_line_edit);
     tool_bar->addWidget(_set_timer_interval_btn);
-//////////////////////////////////////////////////////////////////////
 
     _settings_tool_bar_view_action = tool_bar->toggleViewAction();
     tool_bar->hide();

@@ -6,7 +6,7 @@
 
 #include "world.h"
 
-WorldView::WorldView(World &world, QWidget *parent)
+WorldView::WorldView(World *world, QWidget *parent)
     : QWidget(parent),
       _world(world),
       _grid(true)
@@ -45,6 +45,10 @@ void WorldView::setGrid(bool value) {
     }
 }
 
+void WorldView::setWorld(World *world) {
+    _world = world;
+}
+
 void WorldView::paintEvent(QPaintEvent *event) {
     QPainter painter{ this };
 
@@ -65,9 +69,9 @@ void WorldView::mousePressEvent(QMouseEvent *event) {
 }
 
 void WorldView::displayWorld(QPainter &painter) {
-    for(auto i{ 0ul }; i < _world.row(); ++i) {
-        for(auto j{ 0ul }; j < _world.col(); ++j) {
-            if(_world.test({i, j})) {
+    for(auto i{ 0ul }; i < _world->row(); ++i) {
+        for(auto j{ 0ul }; j < _world->col(); ++j) {
+            if(_world->test({i, j})) {
                 setCell(i, j, painter);
             } else {
                 dropCell(i, j, painter);
@@ -87,11 +91,11 @@ void WorldView::dropCell(index_t row, index_t col, QPainter &painter) {
 }
 
 double WorldView::xScale() const {
-    return double(width()) / _world.col();
+    return double(width()) / _world->col();
 }
 
 double WorldView::yScale() const {
-    return double(height()) / _world.row();
+    return double(height()) / _world->row();
 }
 
 QRectF WorldView::cellRect(index_t row, index_t col) const {
