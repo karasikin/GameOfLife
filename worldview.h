@@ -20,6 +20,16 @@ public:
 
     explicit WorldView(World &world, QWidget *parent = nullptr);
 
+    const QBrush &aliveBrush() const;
+    const QBrush &deadBrush() const;
+    const QPen &pen() const;
+    bool grid() const;
+
+    void setAliveBrush(const QBrush &brush);
+    void setDeadBrush(const QBrush &brush);
+    void setPen(const QPen &pen);
+    void setGrid(bool value);
+
 signals:
 
     void mouseLeftButtonClickedByIndex(index_t row, index_t col);
@@ -31,7 +41,6 @@ protected:
 
 private:
 
-    void drawGrid(QPainter &paiter);
     void displayWorld(QPainter &painter);
     void setCell(index_t row, index_t col, QPainter &painter);
     void dropCell(index_t row, index_t col, QPainter &paiter);
@@ -45,9 +54,10 @@ private:
 
     World &_world;
 
-    QBrush aliveBrush;
-    QBrush deadBrush;
-    QPen pen;
+    QBrush _aliveBrush;
+    QBrush _deadBrush;
+    QPen _pen;
+    bool _grid;
 
 };
 

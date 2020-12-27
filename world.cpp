@@ -215,7 +215,7 @@ int World::numberOfLivingAroundWithBorder(point_t point) const {
     }
 
     if(y > 0) number_of_living += (*_current_world_ptr)[x][y - 1];
-    if(y < _x - 1) number_of_living += (*_current_world_ptr)[x][y + 1];
+    if(y < _y - 1) number_of_living += (*_current_world_ptr)[x][y + 1];
 
     if(x < _x - 1)  {
         if(y > 0) number_of_living += (*_current_world_ptr)[x + 1][y - 1];
@@ -299,12 +299,3 @@ std::istream &operator>>(std::istream &in, World &world) {
 
     return in;
 }
-
-
-
-
-
-
-
-
-

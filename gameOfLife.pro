@@ -11,6 +11,7 @@ SOURCES += \
         worldview.cpp
 
 HEADERS += \
+    defaultsettings.h \
     mainwindow.h \
     world.h \
     worldview.h
