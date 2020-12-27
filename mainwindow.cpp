@@ -13,35 +13,27 @@
 #include <QDebug>
 
 #include "worldview.h"
+#include "defaultsettings.h"
 
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+      _world(initDefaultWorld()),
+      _previous_world(initDefaultWorld()),
+      _timer(std::make_unique<QTimer>()),
+      _timer_interval(DefaultSettings::timerIntervaMs),
+      _world_view(new WorldView{*_world})
+
 {
-    // Настройки в будущем должны где-то  сохраняться и потом восстанавливаться
-    const auto size{ std::tuple{10, 20} };
-    const bool saveChangeList{ false };
-    const World::NeighborCountingPolicy ncPolicy{ World::WITHOUT_BORDER };
-    const auto timerInterval{ std::chrono::milliseconds{100} };
-    const auto fontSize{ 11 };
-    /* Настройки WorldView не задыть добавить должен ты!!! */
-    // Конец настройки
-
-
-    /* font setting */
     auto font{ this->font() };
-    font.setPointSize(fontSize);
+    font.setPointSize(DefaultSettings::fontSize);
     setFont(font);
-    //
 
+    _timer->setInterval(_timer_interval);
 
-    _world = std::make_unique<World>(size, saveChangeList, ncPolicy);
-    _previous_world = std::make_unique<World>(size, saveChangeList, ncPolicy);
-    _world_view = new WorldView(*_world);
-
-    _timer = std::make_unique<QTimer>();
-    _timer->setInterval(timerInterval);
+    initActions();
+    initWidgets();
 
     addToolBar(Qt::LeftToolBarArea, createSettingsToolBar());
     addToolBar(Qt::TopToolBarArea, createControlToolBar());
@@ -52,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_set_world_size_btn, &QPushButton::clicked, this, &MainWindow::onChangeWorldSize);
     connect(_world_row_line_edit, &QLineEdit::returnPressed, this, &MainWindow::onChangeWorldSize);
     connect(_world_col_line_edit, &QLineEdit::returnPressed, this, &MainWindow::onChangeWorldSize);
+    connect(_set_timer_interval_btn, &QPushButton::clicked, this, &MainWindow::onChangeTimerInterval);
+    connect(_timer_line_edit, &QLineEdit::returnPressed, this, &MainWindow::onChangeTimerInterval);
 
     setCentralWidget(_world_view);
 
@@ -170,22 +164,42 @@ void MainWindow::onChangeWorldSize() {
     }
 
     /// Читать конфигурацию из настроек!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    *_world = World{ {row_cout, col_cout}, false, World::WITHOUT_BORDER };
+    *_world = World{{row_cout, col_cout}, DefaultSettings::isSaveLastStep, DefaultSettings::neighborCountingPolicy};
     _world_view->update();
+}
+
+void MainWindow::onChangeTimerInterval() {
+    qDebug() << "<onChangeTimerInterval> slot colled";
+
+    bool interval_ok;
+
+    _world_view->setFocus();
+    auto interval{ _timer_line_edit->text().toUInt(&interval_ok) };
+
+    if(isGameRunning() || !interval_ok) {
+        _timer_line_edit->setText(QString::number(_timer_interval));
+        return;
+    }
+
+    if(_timer_interval == int(interval)) {
+        return;
+    }
+
+    _timer_interval = interval;
+    _timer->setInterval(std::chrono::milliseconds(_timer_interval));
 }
 
 void MainWindow::onSaveWorld() {
     qDebug() << "<onSaveWorld> slot colled()";
-
-    const QString extansion{ ".wrld" }; // В настройки!!!
-
     if(isGameRunning()) {
         return;
     }
 
-    auto fileName{ QFileDialog::getSaveFileName(this, "Save file", "", "*" + extansion) };
-    if(!fileName.endsWith(extansion)) {
-        fileName.append(extansion);
+    QString filter{QString{"*%1"}.arg(QString::fromStdString(DefaultSettings::fileExtension))};
+    auto fileName{ QFileDialog::getSaveFileName(this, "Save file", "", filter) };
+
+    if(!fileName.endsWith(QString::fromStdString(DefaultSettings::fileExtension))) {
+        fileName.append(QString::fromStdString(DefaultSettings::fileExtension));
     }
 
     std::ofstream out{ fileName.toStdString() };
@@ -199,13 +213,13 @@ void MainWindow::onSaveWorld() {
 void MainWindow::onLoadWorld() {
     qDebug() << "<onLoadWorld> slot colled()";
 
-    const QString extansion{ ".wrld" }; // В настройки!!!!!!!!
-
     if(isGameRunning()) {
         return;
     }
 
-    auto fileName{ QFileDialog::getOpenFileName(this, "Open file", "", "*" + extansion) };
+    QString filter{QString{"*%1"}.arg(QString::fromStdString(DefaultSettings::fileExtension))};
+    auto fileName{ QFileDialog::getOpenFileName(this, "Open file", "", filter) };
+
     std::ifstream in{ fileName.toStdString() };
     if(in) {
         in >> *_world;
@@ -215,36 +229,52 @@ void MainWindow::onLoadWorld() {
     }
 }
 
+void MainWindow::initActions() {
+    _restore_action = new QAction{QIcon(":images/resources/undo_64.png"), "Restore", this};
+    _restore_action->setShortcut(QKeySequence::Refresh);
+    connect(_restore_action, &QAction::triggered, this, &MainWindow::onRestoreWorld);
+
+    _show_grid_action = new QAction{"Show grid", this};
+    _show_grid_action->setCheckable(true);
+    _show_grid_action->setChecked(_world_view->grid());
+    connect(_show_grid_action, &QAction::triggered, this, &MainWindow::onShowGridToggle);
+
+    _border_policy_action = new QAction{"World with borders", this};
+    _border_policy_action->setCheckable(true);
+    _border_policy_action->setChecked(_world->neighborCountingPolicy() == World::WITH_BORDER);
+    connect(_border_policy_action, &QAction::triggered, this, &MainWindow::onBorderPolicyToggle);
+}
+
+void MainWindow::initWidgets() {
+    _world_row_line_edit = new QLineEdit{ QString::number(_world->row()), this };
+    _world_row_line_edit->setMaximumWidth(50);
+    _world_col_line_edit = new QLineEdit{ QString::number(_world->col()), this };
+    _world_col_line_edit->setMaximumWidth(50);
+    _set_world_size_btn = new QPushButton{ "Resize", this };
+
+    _timer_line_edit = new QLineEdit{"100", this};   // Временные меры
+    _timer_line_edit->setMaximumWidth(50);
+    _set_timer_interval_btn = new QPushButton{"Set interval", this};
+}
 
 QToolBar *MainWindow::createSettingsToolBar() {
     auto tool_bar{ new QToolBar{"Settings Toolbar"} };
 
     tool_bar->addWidget(new QLabel{ "Size: ", this });
-
-    _world_row_line_edit = new QLineEdit{ QString::number(_world->row()), this };
-    _world_row_line_edit->setMaximumWidth(50);
     tool_bar->addWidget(_world_row_line_edit);
-
-    _world_col_line_edit = new QLineEdit{ QString::number(_world->col()), this };
-    _world_col_line_edit->setMaximumWidth(50);
     tool_bar->addWidget(_world_col_line_edit);
-
-    _set_world_size_btn = new QPushButton{ "Resize", this };
     tool_bar->addWidget(_set_world_size_btn);
+    tool_bar->addSeparator();
 
     ///// Заглушка дописать ////////////////////
 /////////////////////////////////////////////////////////////
     tool_bar->addWidget(new QLabel{"Timer: ", this});
-
-    _timer_line_edit = new QLineEdit{"100", this};   // Временные меры
-    _timer_line_edit->setMaximumWidth(50);
     tool_bar->addWidget(_timer_line_edit);
-
-    _set_timer_interval_btn = new QPushButton{"Interval", this};
     tool_bar->addWidget(_set_timer_interval_btn);
-    //////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
     _settings_tool_bar_view_action = tool_bar->toggleViewAction();
+    tool_bar->hide();
 
     return tool_bar;
 }
@@ -258,13 +288,15 @@ QToolBar *MainWindow::createControlToolBar() {
 
     _settings_tool_bar_view_action->setIcon(QIcon(":images/resources/view_64.png"));
     _settings_tool_bar_view_action->setShortcut(QKeySequence::NextChild);
+
     tool_bar->addAction(_settings_tool_bar_view_action);
+    tool_bar->addSeparator();
     tool_bar->addAction(QIcon(":images/resources/step_64.png"), "Step", this, &MainWindow::onStepGame);
     tool_bar->addAction(QIcon(":images/resources/start_64.png"), "Start", this, &MainWindow::onStartGame);
     tool_bar->addAction(QIcon(":images/resources/stop_64.png"), "Stop", this, &MainWindow::onStopGame);
+    tool_bar->addAction(_restore_action);
+    tool_bar->addSeparator();
     tool_bar->addAction(QIcon(":images/resources/clear_64.png"), "Clear", this, &MainWindow::onClearWorld);
-    auto restore_action = tool_bar->addAction(QIcon(":images/resources/undo_64.png"), "Restore", this, &MainWindow::onRestoreWorld);
-    restore_action->setShortcut(QKeySequence::Refresh);
 
     return tool_bar;
 }
@@ -276,6 +308,7 @@ QMenuBar *MainWindow::createMenuBar() {
     file_menu->addAction("Save", this, &MainWindow::onSaveWorld, QKeySequence::Save);
     file_menu->addAction("Open", this, &MainWindow::onLoadWorld, QKeySequence::Open);
     file_menu->addAction("Quit", qApp, &QApplication::quit);
+    menu_bar->addMenu(file_menu);
 
     auto world_menu{ new QMenu{"World", this} };
     world_menu->addAction("Step", this, &MainWindow::onStepGame);
@@ -283,25 +316,11 @@ QMenuBar *MainWindow::createMenuBar() {
     world_menu->addAction("Stop", this, &MainWindow::onStopGame);
     world_menu->addAction("Clear", this, &MainWindow::onClearWorld);
     world_menu->addAction("Restore", this, &MainWindow::onRestoreWorld);
+    menu_bar->addMenu(world_menu);
 
     auto settings_menu{ new QMenu{"Settings", this} };
-
-    auto showGridAction{ new QAction{"Show grid", this} };
-    showGridAction->setCheckable(true);
-    showGridAction->setChecked(_world_view->grid());
-    connect(showGridAction, &QAction::triggered, this, &MainWindow::onShowGridToggle);
-    settings_menu->addAction(showGridAction);
-
-
-    auto borderPolicyAction{ new QAction{"World with borders"} };
-    borderPolicyAction->setCheckable(true);
-    borderPolicyAction->setChecked(_world->neighborCountingPolicy() == World::WITH_BORDER);
-    connect(borderPolicyAction, &QAction::triggered, this, &MainWindow::onBorderPolicyToggle);
-    settings_menu->addAction(borderPolicyAction);
-
-
-    menu_bar->addMenu(file_menu);
-    menu_bar->addMenu(world_menu);
+    settings_menu->addAction(_show_grid_action);
+    settings_menu->addAction(_border_policy_action);
     menu_bar->addMenu(settings_menu);
 
     return menu_bar;
@@ -310,4 +329,11 @@ QMenuBar *MainWindow::createMenuBar() {
 void MainWindow::restoreRowColEdit() {
     _world_col_line_edit->setText(QString::number(_world->col()));
     _world_row_line_edit->setText(QString::number(_world->row()));
+}
+
+std::unique_ptr<World> MainWindow::initDefaultWorld() const {
+    return std::make_unique<World>(
+                std::tuple{DefaultSettings::worldRows, DefaultSettings::worldCols},
+                DefaultSettings::isSaveLastStep,
+                DefaultSettings::neighborCountingPolicy);
 }
