@@ -8,12 +8,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         world.cpp \
+        worldeditor.cpp \
         worldview.cpp
 
 HEADERS += \
     defaultsettings.h \
     mainwindow.h \
     world.h \
+    worldeditor.h \
     worldview.h
 
 QT += widgets

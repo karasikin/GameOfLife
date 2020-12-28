@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include "world.h"
+#include "worldeditor.h"
 
 class WorldView;
 class QLineEdit;
@@ -45,6 +45,8 @@ private slots:
     void onSaveWorld();
     void onLoadWorld();
 
+    void onOpenEditor();
+
 private:
 
     void initActions();
@@ -64,6 +66,8 @@ private:
     int _timer_interval;
 
     WorldView *_world_view;
+
+    std::unique_ptr<WorldEditor> _world_editor;
 
     QLineEdit *_world_row_line_edit;
     QLineEdit *_world_col_line_edit;

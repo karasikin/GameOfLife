@@ -23,7 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
       _previous_world(initDefaultWorld()),
       _timer(std::make_unique<QTimer>()),
       _timer_interval(DefaultSettings::timerIntervaMs),
-      _world_view(new WorldView{_world.get()})
+      _world_view(new WorldView{_world.get()}),
+      _world_editor(nullptr)
 
 {
     auto font{ this->font() };
@@ -50,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(_world_view);
 
     _world_view->setFocus();
+
+    onOpenEditor();   // Временно Отладка!!!!
 }
 
 bool MainWindow::isGameRunning() const {
@@ -91,10 +94,11 @@ void MainWindow::onRestoreWorld() {
     qDebug() << "<restoreWorld> slot colled";
     onStopGame();
 
-    auto tmp{ std::move(_world) };
-    _world = std::move(_previous_world);
-    _previous_world = std::move(tmp);
-    _world_view->setWorld(_world.get());
+    auto tmp{ std::move(_world) };                 // Самое тупое место в программе
+    _world = std::move(_previous_world);           // Если что-то посыпится, сразу смотреть сюда
+    _previous_world = std::move(tmp);              // Скорее всего проблемма будет здесь
+    _world_view->setWorld(_world.get());           // Истправление World* сменить на World&, и юзать присваивание вместо свопа
+//    if(_world_editor) _world_editor->setWorld(_world.get());
 
     _world_view->update();
 }
@@ -234,6 +238,20 @@ void MainWindow::onLoadWorld() {
     }
 }
 
+void MainWindow::onOpenEditor() {
+    qDebug() << "<onWorldEditor> slot colled";
+
+    onStopGame();
+
+    if(!_world_editor) {
+        _world_editor = std::make_unique<WorldEditor>();
+        connect(_world_editor.get(), &WorldEditor::becomeHidden, this, &MainWindow::show);
+    }
+
+    this->hide();
+    _world_editor->show();
+}
+
 void MainWindow::initActions() {
     _restore_action = new QAction{QIcon(":images/resources/undo_64.png"), "Restore", this};
     _restore_action->setShortcut(QKeySequence::Refresh);
@@ -299,6 +317,7 @@ QToolBar *MainWindow::createControlToolBar() {
     tool_bar->addAction(_restore_action);
     tool_bar->addSeparator();
     tool_bar->addAction(QIcon(":images/resources/clear_64.png"), "Clear", this, &MainWindow::onClearWorld);
+    tool_bar->addAction("Open editor", this, &MainWindow::onOpenEditor);
 
     return tool_bar;
 }
