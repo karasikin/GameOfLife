@@ -14,11 +14,17 @@ class WorldEditor : public QWidget
 
     Q_OBJECT
 
-    struct WorldMask {
-        explicit WorldMask(std::unique_ptr<World> world);
+    struct WorldMaskRect {
+        explicit WorldMaskRect(size_t x = 0, size_t y = 0, size_t row = 0, size_t col = 0);
 
-        std::unique_ptr<World> world;
-        QRect rect;
+        size_t x, y, row, col;
+    };
+
+    struct WorldMask {
+        explicit WorldMask(World *worldPtr = nullptr);
+
+        World *worldPtr;
+        WorldMaskRect rect;
     };
 
 
@@ -34,7 +40,7 @@ public slots:
 signals:
 
     void becomeHidden();
-    void becomeClosed();
+    void createdWorld(const World &);
 
 protected:
 
@@ -43,17 +49,21 @@ protected:
 private:
 
     std::unique_ptr<QStringList> split(const QString &text) const;
+
     bool loadWorld(const QString &codeline);
+    bool returnWorld(const QString &codeLine);
 
     QString createQString(QString::ConstIterator begin, QString::ConstIterator end) const;
 
 private:
 
     std::unique_ptr<World> _world;
-    std::map<QString, WorldMask> loadedWorlds;
+
+    std::map<QString, WorldMask> _worlds;
+    std::map<QString, World> _cache;
 
     QPlainTextEdit *_codeEdit;
-    QPlainTextEdit *_errorReport;
+    QPlainTextEdit *_reportEdit;
     QPushButton *_startBtn;
     QPushButton *_returnBtn;
 

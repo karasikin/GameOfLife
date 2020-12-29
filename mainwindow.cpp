@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     _world_view->setFocus();
 
-    onOpenEditor();   // Временно Отладка!!!!
+    //onOpenEditor();   // Временно Отладка!!!!
 }
 
 bool MainWindow::isGameRunning() const {
@@ -246,10 +246,18 @@ void MainWindow::onOpenEditor() {
     if(!_world_editor) {
         _world_editor = std::make_unique<WorldEditor>();
         connect(_world_editor.get(), &WorldEditor::becomeHidden, this, &MainWindow::show);
+        connect(_world_editor.get(), &WorldEditor::createdWorld, this, &MainWindow::onCreatedWorld);
     }
 
     this->hide();
     _world_editor->show();
+}
+
+void MainWindow::onCreatedWorld(const World &world) {
+    qDebug() << "<onCreatedWorld> slot colled";
+    _world = std::make_unique<World>(world);
+    _world_view->setWorld(_world.get());
+    restoreRowColEdit();
 }
 
 void MainWindow::initActions() {

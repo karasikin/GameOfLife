@@ -18,7 +18,7 @@ public:
 
 public:
 
-    explicit World(point_t size = {10, 10},
+    explicit World(point_t size = {1, 1},
                    bool saveLastStepChanges = false,
                    NeighborCountingPolicy neighborCountingPolicy = WITH_BORDER);
     World(World &&temporaryWorld);

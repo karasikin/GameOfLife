@@ -46,6 +46,7 @@ private slots:
     void onLoadWorld();
 
     void onOpenEditor();
+    void onCreatedWorld(const World &world);
 
 private:
 

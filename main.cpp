@@ -11,10 +11,10 @@
 int main(int argc, char **argv) {
 
     QApplication app{ argc, argv };
-//    MainWindow mw{};
-//    mw.show();
+    MainWindow mw{};
+    mw.show();
 
-    WorldEditor we;
-    we.show();
+//    WorldEditor we;
+//    we.show();
     return app.exec();
 }
